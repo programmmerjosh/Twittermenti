@@ -20,7 +20,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
     let tweetCount:Int = 100
     let sentimentClassifier = TextClassifier()
     
-    let swifter = Swifter(consumerKey: "WexsmeMBm1nB78utLQXz4njek", consumerSecret: "vZvbemc9vJZQY1WkxgPOoC3as3dwsjaEJXm3hgPO3YH1frLN8J")
+    // located in Secrets.plist
+    var consumer_key = ""
+    var consumer_secret = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,6 +35,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
     }
     
     func fetchTweets() {
+        
+        consumer_key = getAPIKeyValueFromSecrets(withKey: "API Key")
+        consumer_secret = getAPIKeyValueFromSecrets(withKey: "API Secret")
+        
+        let swifter = Swifter(consumerKey: consumer_key, consumerSecret: consumer_secret)
+        
         if let searchText = textField.text {
             
             swifter.searchTweet(using: searchText, lang: "en", count: tweetCount, tweetMode: .extended, success: { (results, metaData) in
@@ -90,5 +98,28 @@ class ViewController: UIViewController, UITextFieldDelegate {
             }
             self.sentimentLabel.alpha = 1
         })
+    }
+    
+    func getAPIKeyValueFromSecrets(withKey key: String) -> String {
+        
+        var plistFormat =  PropertyListSerialization.PropertyListFormat.xml
+        
+        var plistData: [String: AnyObject] = [:]
+        
+        let plistPath: String? = Bundle.main.path(forResource: "Secrets", ofType: "plist")!
+        
+        let plistXML = FileManager.default.contents(atPath: plistPath!)!
+        
+        do {
+            // convert data to a dictionary and handle errors.
+            plistData = try PropertyListSerialization.propertyList(from: plistXML, options: .mutableContainersAndLeaves, format: &plistFormat) as! [String:AnyObject]
+            
+            if let value = plistData[key] {
+                return value as! String
+            }
+        } catch {
+            print("Error reading plist: \(error), format: \(plistFormat)")
+        }
+        return ""
     }
 }
