@@ -36,6 +36,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     func fetchTweets() {
         
+//        removed keys from Secrets.plist temporarily - this will stop app from working
         consumer_key = getAPIKeyValueFromSecrets(withKey: "API Key")
         consumer_secret = getAPIKeyValueFromSecrets(withKey: "API Secret")
         
